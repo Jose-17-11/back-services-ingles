@@ -10,7 +10,7 @@ export const modelReadUsers = async () => {
 export const modelLoginUsers = async (acceso) => {
     const { email, password } = await acceso;
     const [rows] = await pool.query(
-        "SELECT * FROM Usuarios WHERE email = ? AND password = ?",
+        "SELECT id_usuario FROM Usuarios WHERE email = ? AND password = ?",
         [email, password]
     );
     console.log("Query result:", rows);  // Log para ver el resultado de la consulta

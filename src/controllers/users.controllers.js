@@ -10,10 +10,20 @@ export const getUsers = async (req, res) => {
     }
 };
 
+// Verifica que el usuario exista en la base de datos y devuelve el id mediante una cookie
 export const loginUsers = async (req, res) => {
     try {
         const acceso = await modelLoginUsers(req.body);
-        res.send(`Creando usuarios: ${acceso}`)
+        if(acceso.length > 0) {
+            const userId = acceso[0].id_usuario;
+            res.cookie("userId", userId, {
+                httpOnly: true,
+                maxAge: 24 * 60 * 60 * 1000 // 1 día
+            });
+            res.json({ message: "Usuario logueado", userId });
+        } else {
+            res.status(401).json({ message: "Credenciales incorrectas" });
+        }
     } catch (error) {
         console.error("Error fetching users:", error);
         res.status(500).json({ message: "Error fetching users" });
