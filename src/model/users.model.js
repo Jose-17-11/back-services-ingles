@@ -6,6 +6,13 @@ export const modelReadUsers = async () => {
     console.log("Query result:", rows);
     return rows; 
 }
+
+export const modelReadUserActives = async () => {
+    const total = await pool.query("select * from Usuarios where status = 'activo'");
+    console.log("Query result: ", total);
+    return total    
+}
+
 // Esta función verificara el acceso al panel del usuario
 export const modelLoginUsers = async (acceso) => {
     const { email, password } = await acceso;

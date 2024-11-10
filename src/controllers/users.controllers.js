@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { modelReadUsers, modelLoginUsers } from "../model/users.model.js";
+import { modelReadUsers, modelReadUserActives, modelLoginUsers } from "../model/users.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
@@ -14,6 +14,16 @@ export const getUsers = async (req, res) => {
     }
 };
 
+export const getUserActives = async (req, res) => {
+    try {
+        const [total] = await modelReadUserActives();
+        res.json(total);
+    } catch (error) {
+        console.error("Error fetching users total", error);
+        res.status(500).json({message: "Error fetching users total"});
+    }
+}
+
 // Verifica que el usuario exista en la base de datos y devuelve el id mediante una cookie
 export const loginUsers = async (req, res) => {
     try {
@@ -22,7 +32,7 @@ export const loginUsers = async (req, res) => {
             const userId = acceso[0].id_usuario;
             // Generar el token JWT
             const token = jwt.sign({ userId }, JWT_SECRET, {
-                expiresIn: '2m' // Expiración de 1 día
+                expiresIn: '10m' // Expiración de 1 día
             });
             console.log(token);
             
