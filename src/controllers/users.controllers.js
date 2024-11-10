@@ -1,6 +1,14 @@
-export const getUsers = (req, res) => {
-    res.send('Obteniendo usuarios')
-}
+import { modelReadUsers, modelLoginUsers } from "../model/users.model.js";
+
+export const getUsers = async (req, res) => {
+    try {
+        const [users] = await modelReadUsers(); 
+        res.json(users);
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Error fetching users" });
+    }
+};
 
 export const createUsers = (req, res) => {
     console.log(req.body);
