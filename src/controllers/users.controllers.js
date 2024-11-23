@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { modelReadUsers, modelReadUserActives, modelLoginUsers } from "../model/users.model.js";
+import { modelReadUsers, modelReadUserActives, modelReadUserData, modelLoginUsers } from "../model/users.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
@@ -24,15 +24,33 @@ export const getUserActives = async (req, res) => {
     }
 }
 
+export const getUserData = async (req, res) => {
+    try {
+        const userId = req.cookies.userId;
+        console.log("El id en coockie es: ", userId);
+        
+        if (!userId) {
+            return res.status(400).json({ message: "ID de usuario no proporcionado" });
+        }
+        const [data] = await modelReadUserData(userId);
+        res.json(data)
+    } catch (error) {
+        console.error("Error fetching user data", error);
+        res.status(500).json({message: "Error fetching user data"});
+    }
+}
+
 // Verifica que el usuario exista en la base de datos y devuelve el id mediante una cookie
 export const loginUsers = async (req, res) => {
     try {
         const acceso = await modelLoginUsers(req.body);
         if(acceso.length > 0) {
             const userId = acceso[0].id_usuario;
+            console.log(userId);
+            
             // Generar el token JWT
             const token = jwt.sign({ userId }, JWT_SECRET, {
-                expiresIn: '10m' // Expiración de 1 día
+                expiresIn: '1m' // Expiración de 1 día
             });
             console.log(token);
             
