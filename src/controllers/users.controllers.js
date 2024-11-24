@@ -1,9 +1,10 @@
+// Importaciones y configuración inicial
 import jwt from 'jsonwebtoken'
 import { modelReadUsers, modelReadUserActives, modelReadUserData, modelLoginUsers } from "../model/users.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
-// Se leen los 10 mejores lugares
+// Llama al procedimiento que muestra los 10 mejores niveles de la aplicacion
 export const getUsers = async (req, res) => {
     try {
         const [users] = await modelReadUsers(); 
@@ -14,6 +15,7 @@ export const getUsers = async (req, res) => {
     }
 };
 
+// Nos muestra todos los usuarios activos
 export const getUserActives = async (req, res) => {
     try {
         const [total] = await modelReadUserActives();
@@ -24,16 +26,20 @@ export const getUserActives = async (req, res) => {
     }
 }
 
+// Busca a un usuario en base a su Id
 export const getUserData = async (req, res) => {
     try {
-        const userId = req.cookies.userId;
+        const {userId} = req.params;
         console.log("El id en coockie es: ", userId);
+        console.log(userId);
         
         if (!userId) {
             return res.status(400).json({ message: "ID de usuario no proporcionado" });
         }
         const [data] = await modelReadUserData(userId);
-        res.json(data)
+        console.log(data[0]);
+        
+        res.json(data[0])
     } catch (error) {
         console.error("Error fetching user data", error);
         res.status(500).json({message: "Error fetching user data"});
@@ -50,13 +56,13 @@ export const loginUsers = async (req, res) => {
             
             // Generar el token JWT
             const token = jwt.sign({ userId }, JWT_SECRET, {
-                expiresIn: '1m' // Expiración de 1 día
+                expiresIn: '10m' 
             });
             console.log(token);
             
             res.cookie("userId", userId, {
                 httpOnly: true,
-                maxAge: 24 * 60 * 60 * 1000 // 1 día
+                maxAge: 10 * 60 * 1000
             });
             res.json({ message: "Usuario logueado", token, userId });
         } else {

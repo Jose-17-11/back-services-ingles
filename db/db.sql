@@ -1,6 +1,9 @@
 -- Para conectarse manualmente a la base de datos ingresar el comando: 
 -- sudo docker exec -it mysql mysql -u root -p*****
 
+-- Usuario de prueba: juan.perez@gmail.com
+-- Contraseña de prueba: hashedpassword1
+
 CREATE DATABASE inglishServices; 
 USE inglishServices;
 
@@ -39,26 +42,12 @@ CREATE TABLE Niveles (
     estado VARCHAR(20) NOT NULL
 );
 
--- Crear tabla Progreso
-CREATE TABLE Progreso (
-    id_progreso INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT,
-    fecha_inicio DATE NOT NULL,
-    fecha_fin DATE,
-    status VARCHAR(20) NOT NULL,
-    FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario) ON DELETE CASCADE
-);
-
 -- Crear tabla Sesiones
 CREATE TABLE Sesiones (
-    id_sesion INT AUTO_INCREMENT PRIMARY KEY,
-    id_progreso INT,
-    nombre VARCHAR(255) NOT NULL,
-    fecha_inicio DATE NOT NULL,
-    fecha_fin DATE,
-    porcentaje INT NOT NULL,
-    status VARCHAR(20) NOT NULL,
-    FOREIGN KEY (id_progreso) REFERENCES Progreso(id_progreso) ON DELETE CASCADE
+  id_sesion INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(255) NOT NULL,
+  porcentaje INT NOT NULL,  
+  status VARCHAR(20) NOT NULL  
 );
 
 -- Crear tabla Niveles_Sesiones
@@ -71,6 +60,18 @@ CREATE TABLE Niveles_Sesiones (
     FOREIGN KEY (id_nivel) REFERENCES Niveles(id_nivel) ON DELETE CASCADE
 );
 
+-- Crear tabla Progreso
+CREATE TABLE Progreso (
+  id_progreso INT AUTO_INCREMENT PRIMARY KEY,
+  id_sesion INT,
+  id_usuario INT,
+  fecha_inicio DATE,
+  fecha_fin DATE,  
+  status VARCHAR(20),
+  FOREIGN KEY (id_sesion) REFERENCES Sesiones(id_sesion),
+  FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario)
+);
+
 -- Crear tabla Usuarios_Niveles
 CREATE TABLE Usuarios_Niveles (
     id_usuario INT,
@@ -80,6 +81,25 @@ CREATE TABLE Usuarios_Niveles (
     FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_nivel) REFERENCES Niveles(id_nivel) ON DELETE CASCADE
 );
+
+-- Procedimiento sql que devuelve a los 10 mas altos
+DELIMITER $$
+
+CREATE PROCEDURE ObtenerUsuariosConNivelMasAlto()
+BEGIN
+    SELECT 
+        Usuarios.nombre AS nombre_usuario, 
+        Niveles.nombre AS nivel_mas_alto,
+        Usuarios_Niveles.fecha_logro AS fecha_de_logro
+    FROM Usuarios
+    JOIN Usuarios_Niveles ON Usuarios.id_usuario = Usuarios_Niveles.id_usuario
+    JOIN Niveles ON Usuarios_Niveles.id_nivel = Niveles.id_nivel
+    ORDER BY Niveles.id_nivel DESC, Usuarios_Niveles.fecha_logro ASC
+    LIMIT 10;
+END$$
+
+DELIMITER ;
+
 
 -- Insercciones de prueba
 
@@ -101,35 +121,16 @@ VALUES
 (2, 2, '2024-11-05'),
 (1, 3, '2024-11-10');
 
-INSERT INTO Niveles (nombre, descripcion, estado) 
-VALUES
-('Nivel 1', 'Introducción a los conceptos básicos de inglés.', 'activo'),
-('Nivel 2', 'Ampliación de vocabulario y estructuras gramaticales.', 'activo'),
-('Nivel 3', 'Conversación avanzada y práctica intensiva.', 'inactivo');
+-- Insertar niveles comenzando desde id_nivel = 1
+INSERT INTO Niveles (id_nivel, nombre, descripcion, estado) VALUES
+(1, 'Inglés Básico 1', 'Nivel de inglés básico inicial, introducción a vocabulario y frases comunes.', 'activo'),
+(2, 'Inglés Básico 2', 'Nivel de inglés básico intermedio, profundización en estructuras gramaticales y vocabulario.', 'activo'),
+(3, 'Inglés Básico 3', 'Nivel de inglés básico avanzado, expansión de vocabulario y ejercicios de gramática avanzada.', 'activo'),
+(4, 'Inglés Básico 4', 'Nivel de inglés básico alto, preparación para pasar al nivel intermedio con enfoque en comprensión auditiva.', 'activo'),
+(5, 'Inglés Básico 5', 'Nivel final de inglés básico, consolidación de conocimientos y práctica intensiva de conversación.', 'activo'),
+(6, 'Inglés Intermedio 1', 'Nivel intermedio de inglés, introducción a frases complejas y comprensión de textos más avanzados.', 'activo'),
+(7, 'Inglés Intermedio 2', 'Nivel intermedio de inglés, enfocado en hablar de temas abstractos y la mejora de habilidades auditivas.', 'activo'),
+(8, 'Inglés Intermedio 3', 'Nivel intermedio avanzado, mayor fluidez en conversación y análisis de textos complejos.', 'activo'),
+(9, 'Inglés Intermedio 4', 'Nivel intermedio alto, introducción a la literatura en inglés y debate sobre temas sociales y culturales.', 'activo'),
+(10, 'Inglés Intermedio 5', 'Nivel intermedio avanzado, perfeccionamiento de habilidades lingüísticas para alcanzar nivel avanzado.', 'activo');
 
-INSERT INTO Progreso (id_usuario, fecha_inicio, fecha_fin, status) 
-VALUES
-(1, '2024-10-01', '2024-10-15', 'completado'),
-(2, '2024-09-15', NULL, 'en progreso'),
-(3, '2024-10-20', NULL, 'en progreso');
-
-INSERT INTO Sesiones (id_progreso, nombre, fecha_inicio, fecha_fin, porcentaje, status) 
-VALUES
-(1, 'Sesión 1: Vocabulario Básico', '2024-10-01', '2024-10-03', 100, 'terminada'),
-(1, 'Sesión 2: Gramática Intermedia', '2024-10-04', '2024-10-10', 100, 'terminada'),
-(2, 'Sesión 1: Vocabulario Básico', '2024-09-15', NULL, 50, 'incompleta'),
-(3, 'Sesión 1: Vocabulario Básico', '2024-10-20', NULL, 10, 'incompleta');
-
-INSERT INTO Niveles_Sesiones (id_sesion, id_nivel, porcentaje) 
-VALUES
-(1, 1, 100),
-(2, 2, 100),
-(3, 1, 50),
-(4, 3, 10);
-
-INSERT INTO Usuarios_Niveles (id_usuario, id_nivel, fecha_logro) 
-VALUES
-(1, 1, '2024-10-01'),
-(1, 2, '2024-10-10'),
-(2, 1, '2024-09-20'),
-(3, 1, '2024-10-20');

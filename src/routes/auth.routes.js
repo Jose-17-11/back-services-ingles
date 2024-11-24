@@ -1,3 +1,4 @@
+// Rutas de la autenticación
 import { Router } from "express";
 import { authenticateToken } from "../middleware/authMiddleware.js";
 
