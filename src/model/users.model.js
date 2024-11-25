@@ -30,6 +30,18 @@ export const modelLoginUsers = async (acceso) => {
     return rows; 
 }
 
+export const modelReadProgresoTotal = async (id) => {
+    const [rows] = await pool.query("CALL PorcentajeTotalNivelesCompletados(?)", [id]);
+    // console.log("Query result:", rows);
+    return rows; 
+}
+
+export const modelReadProgresoParcial = async (id) => {
+    const [rows] = await pool.query("CALL PorcentajePorNivel(?)", [id]);
+    // console.log("Query result:", rows);
+    return rows; 
+}
+
 export const modelUpdateUsers = () => {
 
 }

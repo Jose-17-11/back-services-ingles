@@ -1,6 +1,6 @@
 // Importaciones y configuración inicial
 import jwt from 'jsonwebtoken'
-import { modelReadUsers, modelReadUserActives, modelReadUserData, modelLoginUsers } from "../model/users.model.js";
+import { modelReadUsers, modelReadUserActives, modelReadUserData, modelLoginUsers, modelReadProgresoTotal, modelReadProgresoParcial } from "../model/users.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
@@ -71,6 +71,44 @@ export const loginUsers = async (req, res) => {
     } catch (error) {
         console.error("Error fetching users:", error);
         res.status(500).json({ message: "Error fetching users" });
+    }
+}
+
+export const getProgresoTotal = async (req, res) => {
+    try {
+        const {userId} = req.params;
+        console.log("El id en coockie es: ", userId);
+        console.log(userId);
+        
+        if (!userId) {
+            return res.status(400).json({ message: "ID de usuario no proporcionado" });
+        }
+        const [data] = await modelReadProgresoTotal(userId);
+        console.log(data[0]);
+        
+        res.json(data[0])
+    } catch (error) {
+        console.error("Error fetching user data", error);
+        res.status(500).json({message: "Error fetching user data"});
+    }
+}
+
+export const getProgresoParcial = async (req, res) => {
+    try {
+        const {userId} = req.params;
+        console.log("El id en coockie es: ", userId);
+        console.log(userId);
+        
+        if (!userId) {
+            return res.status(400).json({ message: "ID de usuario no proporcionado" });
+        }
+        const [data] = await modelReadProgresoParcial(userId);
+        console.log(data);
+        
+        res.json(data)
+    } catch (error) {
+        console.error("Error fetching user data", error);
+        res.status(500).json({message: "Error fetching user data"});
     }
 }
 

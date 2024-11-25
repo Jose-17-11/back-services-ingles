@@ -4,7 +4,7 @@ import { createPool } from "mysql2/promise";
  * sudo docker inspect mysql
  */
 export const pool = createPool({
-    host:'mysql',
+    host:'172.17.0.1' ,
     user:'root',
     password:'12345',
     port: 3306,
